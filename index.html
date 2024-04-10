@@ -5,7 +5,7 @@
     <style>
       table {
         border-collapse: collapse;
-        width: 100%;
+        width: 75%;
       }
 
       th,
@@ -112,7 +112,7 @@
                     .getElementsByTagName("tbody")[0];
                   dataTableBody.innerHTML = "";
                   for (var i = 0; i < maxValues; i++) {
-                    var newRow = dataTableBody.insertRow();
+                    var newRow = dataTableBody.insertRow(-1); // Insert row at the end of the tbody
                     newRow.insertCell(0).textContent = i + 1;
                     newRow.insertCell(1).textContent =
                       valuesByField["Profile Number"][i] || "";
