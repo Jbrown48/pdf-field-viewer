@@ -69,7 +69,7 @@
                   "Manifest No.": /Vol Wt\s*(\w+)/gi,
                   "Plant Received Date":
                     /Plant Received Date\s+(\d{1,2}\/\d{1,2}\/\d{4})/gi,
-                  "Drum Weight": /Drum\s*Wgt\s*(?:\S+\s+){7,8}(\d+)/gi,
+                  "Drum Weight": /Drum\s*Wgt\s*(?:\S+\s+){6,8}(\d+)/gi,
                 };
 
                 // Loop through each page
@@ -137,69 +137,29 @@
           fileReader.readAsArrayBuffer(file);
         });
 
-      // function sortTableDec(columnName) {
-      //   var table, rows, switching, i, x, y, shouldSwitch;
-      //   table = document.getElementById("dataTable");
-      //   switching = true;
-      //   while (switching) {
-      //     switching = false;
-      //     rows = table.rows;
-      //     for (i = 1; i < rows.length - 1; i++) {
-      //       shouldSwitch = false;
-      //       x =
-      //         rows[i].getElementsByTagName("td")[
-      //           Object.keys(valuesByField).indexOf(columnName)
-      //         ];
-      //       y =
-      //         rows[i + 1].getElementsByTagName("td")[
-      //           Object.keys(valuesByField).indexOf(columnName)
-      //         ];
-      //       if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-      //         shouldSwitch = true;
-      //         break;
-      //       }
-      //     }
-      //     if (shouldSwitch) {
-      //       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      //       switching = true;
-      //     }
-      //   }
-      // }
+      function convertDate(d) {
+        var p = d.split("/");
+        return +(p[2] + p[0] + p[1]);
+      }
 
       function sortTableAsc(columnName) {
-        var table, rows, switching, i, x, y, shouldSwitch;
-        table = document.getElementById("dataTable");
-        switching = true;
-        while (switching) {
-          switching = false;
-          rows = table.rows;
-          for (i = 1; i < rows.length - 1; i++) {
-            shouldSwitch = false;
-            if (columnName !== "#") {
-              x =
-                rows[i].getElementsByTagName("td")[
-                  Object.keys(valuesByField).indexOf(columnName)
-                ];
-              y =
-                rows[i + 1].getElementsByTagName("td")[
-                  Object.keys(valuesByField).indexOf(columnName)
-                ];
-              if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                shouldSwitch = true;
-                break;
-              }
-            }
-          }
-          if (shouldSwitch) {
-            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-            switching = true;
-          }
-        }
+        var tbody = document.querySelector("tbody");
+        // get trs as array for ease of use
+        var rows = [].slice.call(tbody.querySelectorAll("tr"));
 
-        // Renumber the # column
-        for (i = 1; i < rows.length; i++) {
-          rows[i].cells[0].textContent = i;
-        }
+        rows.sort(function (a, b) {
+          return (
+            convertDate(a.cells[3].innerHTML) -
+            convertDate(b.cells[3].innerHTML)
+          );
+        });
+
+        rows.forEach(function (v, i) {
+          // Append the row to the tbody
+          tbody.appendChild(v);
+          // Update the # column with the correct numbering
+          v.cells[0].textContent = i + 1;
+        });
       }
     </script>
   </body>
