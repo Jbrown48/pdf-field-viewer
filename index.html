@@ -41,6 +41,14 @@
       pdfjsLib.GlobalWorkerOptions.workerSrc =
         "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js";
 
+      // Initialize empty arrays to store data
+      var valuesByField = {
+        "Profile Number": [],
+        "Manifest No.": [],
+        "Plant Received Date": [],
+        "Drum Weight": [],
+      };
+
       document
         .getElementById("pdfInput")
         .addEventListener("change", function (e) {
@@ -61,14 +69,6 @@
                   "Plant Received Date":
                     /Plant Received Date\s+(\d{1,2}\/\d{1,2}\/\d{4})/gi,
                   "Drum Weight": /Drum\s*Wgt\s*(?:\S+\s+){8}(\S+)/gi,
-                };
-
-                // Initialize empty arrays to store data
-                var valuesByField = {
-                  "Profile Number": [],
-                  "Manifest No.": [],
-                  "Plant Received Date": [],
-                  "Drum Weight": [],
                 };
 
                 // Loop through each page
@@ -123,6 +123,9 @@
                     newRow.insertCell(4).textContent =
                       valuesByField["Drum Weight"][i] || "";
                   }
+
+                  // Sort the table by Plant Received Date in descending order
+                  sortTableAsc("Plant Received Date");
                 });
               })
               .catch(function (error) {
@@ -132,6 +135,71 @@
 
           fileReader.readAsArrayBuffer(file);
         });
+
+      // function sortTableDec(columnName) {
+      //   var table, rows, switching, i, x, y, shouldSwitch;
+      //   table = document.getElementById("dataTable");
+      //   switching = true;
+      //   while (switching) {
+      //     switching = false;
+      //     rows = table.rows;
+      //     for (i = 1; i < rows.length - 1; i++) {
+      //       shouldSwitch = false;
+      //       x =
+      //         rows[i].getElementsByTagName("td")[
+      //           Object.keys(valuesByField).indexOf(columnName)
+      //         ];
+      //       y =
+      //         rows[i + 1].getElementsByTagName("td")[
+      //           Object.keys(valuesByField).indexOf(columnName)
+      //         ];
+      //       if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+      //         shouldSwitch = true;
+      //         break;
+      //       }
+      //     }
+      //     if (shouldSwitch) {
+      //       rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      //       switching = true;
+      //     }
+      //   }
+      // }
+
+      function sortTableAsc(columnName) {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("dataTable");
+        switching = true;
+        while (switching) {
+          switching = false;
+          rows = table.rows;
+          for (i = 1; i < rows.length - 1; i++) {
+            shouldSwitch = false;
+            if (columnName !== "#") {
+              x =
+                rows[i].getElementsByTagName("td")[
+                  Object.keys(valuesByField).indexOf(columnName)
+                ];
+              y =
+                rows[i + 1].getElementsByTagName("td")[
+                  Object.keys(valuesByField).indexOf(columnName)
+                ];
+              if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                shouldSwitch = true;
+                break;
+              }
+            }
+          }
+          if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+          }
+        }
+
+        // Renumber the # column
+        for (i = 1; i < rows.length; i++) {
+          rows[i].cells[0].textContent = i;
+        }
+      }
     </script>
   </body>
 </html>
