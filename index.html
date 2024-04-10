@@ -64,11 +64,12 @@
               .promise.then(function (pdf) {
                 // Initialize field map to grab fields and values
                 var fieldMap = {
-                  "Profile Number": /Profile\s*Number\s*(?:\S+\s+){15}(\S+)/gi,
+                  "Profile Number":
+                    /Profile\s*Number\s*(?:\S{1,13}\s+){15}(\S{1,13})/gi,
                   "Manifest No.": /Vol Wt\s*(\w+)/gi,
                   "Plant Received Date":
                     /Plant Received Date\s+(\d{1,2}\/\d{1,2}\/\d{4})/gi,
-                  "Drum Weight": /Drum\s*Wgt\s*(?:\S+\s+){8}(\S+)/gi,
+                  "Drum Weight": /Drum\s*Wgt\s*(?:\S+\s+){7,8}(\d+)/gi,
                 };
 
                 // Loop through each page
