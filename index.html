@@ -26,10 +26,10 @@
     <table id="dataTable">
       <thead>
         <tr>
-          <th>#</th>
+          <th>Plant Received Date</th>
           <th>Profile Number</th>
           <th>Manifest No.</th>
-          <th>Plant Received Date</th>
+          <th>#</th>
           <th>Drum Weight</th>
         </tr>
       </thead>
@@ -114,13 +114,13 @@
                   dataTableBody.innerHTML = "";
                   for (var i = 0; i < maxValues; i++) {
                     var newRow = dataTableBody.insertRow(-1); // Insert row at the end of the tbody
-                    newRow.insertCell(0).textContent = i + 1;
+                    newRow.insertCell(0).textContent =
+                      valuesByField["Plant Received Date"][i] || "";
                     newRow.insertCell(1).textContent =
                       valuesByField["Profile Number"][i] || "";
                     newRow.insertCell(2).textContent =
                       valuesByField["Manifest No."][i] || "";
-                    newRow.insertCell(3).textContent =
-                      valuesByField["Plant Received Date"][i] || "";
+                    newRow.insertCell(3).textContent = 1;
                     newRow.insertCell(4).textContent =
                       valuesByField["Drum Weight"][i] || "";
                   }
@@ -149,16 +149,14 @@
 
         rows.sort(function (a, b) {
           return (
-            convertDate(a.cells[3].innerHTML) -
-            convertDate(b.cells[3].innerHTML)
+            convertDate(a.cells[0].innerHTML) -
+            convertDate(b.cells[0].innerHTML)
           );
         });
 
-        rows.forEach(function (v, i) {
+        rows.forEach(function (v) {
           // Append the row to the tbody
           tbody.appendChild(v);
-          // Update the # column with the correct numbering
-          v.cells[0].textContent = i + 1;
         });
       }
     </script>
