@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PDF Field Extractor</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+  </head>
+  <body>
+    <input type="file" id="pdfInput" accept=".pdf" />
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Profile Number</th>
+          <th>Manifest No.</th>
+          <th>Plant Received Date</th>
+          <th>Drum Weight</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      // Specify the URL for the pdf.js worker script
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js";
+
+      document
+        .getElementById("pdfInput")
+        .addEventListener("change", function (e) {
+          var file = e.target.files[0];
+          var fileReader = new FileReader();
+
+          fileReader.onload = function () {
+            var typedarray = new Uint8Array(this.result);
+
+            // Load the PDF using pdf.js
+            pdfjsLib
+              .getDocument(typedarray)
+              .promise.then(function (pdf) {
+                // Initialize field map to grab fields and values
+                var fieldMap = {
+                  "Profile Number": /Profile\s*Number\s*(?:\S+\s+){15}(\S+)/gi,
+                  "Manifest No.": /Vol Wt\s*(\w+)/gi,
+                  "Plant Received Date":
+                    /Plant Received Date\s+(\d{1,2}\/\d{1,2}\/\d{4})/gi,
+                  "Drum Weight": /Drum\s*Wgt\s*(?:\S+\s+){8}(\S+)/gi,
+                };
+
+                // Initialize empty arrays to store data
+                var valuesByField = {
+                  "Profile Number": [],
+                  "Manifest No.": [],
+                  "Plant Received Date": [],
+                  "Drum Weight": [],
+                };
+
+                // Loop through each page
+                var promises = [];
+                for (var i = 1; i <= pdf.numPages; i++) {
+                  promises.push(
+                    pdf.getPage(i).then(function (page) {
+                      // Extract text content from the page
+                      return page.getTextContent().then(function (textContent) {
+                        // Convert text content to a string
+                        var text = textContent.items
+                          .map(function (item) {
+                            return item.str;
+                          })
+                          .join("");
+
+                        // Extract data using regular expressions and store in arrays
+                        Object.keys(fieldMap).forEach(function (field) {
+                          var regex = fieldMap[field];
+                          var match;
+                          while ((match = regex.exec(text)) !== null) {
+                            var value = match[1].trim() || "Not found";
+                            valuesByField[field].push(value);
+                          }
+                        });
+                      });
+                    })
+                  );
+                }
+
+                // Wait for all promises to resolve
+                Promise.all(promises).then(function () {
+                  // Get the maximum number of values for any field
+                  var maxValues = Math.max(
+                    ...Object.values(valuesByField).map((arr) => arr.length)
+                  );
+
+                  // Add rows to the table
+                  var dataTableBody = document
+                    .getElementById("dataTable")
+                    .getElementsByTagName("tbody")[0];
+                  dataTableBody.innerHTML = "";
+                  for (var i = 0; i < maxValues; i++) {
+                    var newRow = dataTableBody.insertRow();
+                    newRow.insertCell(0).textContent = i + 1;
+                    newRow.insertCell(1).textContent =
+                      valuesByField["Profile Number"][i] || "";
+                    newRow.insertCell(2).textContent =
+                      valuesByField["Manifest No."][i] || "";
+                    newRow.insertCell(3).textContent =
+                      valuesByField["Plant Received Date"][i] || "";
+                    newRow.insertCell(4).textContent =
+                      valuesByField["Drum Weight"][i] || "";
+                  }
+                });
+              })
+              .catch(function (error) {
+                console.error("Error parsing PDF:", error);
+              });
+          };
+
+          fileReader.readAsArrayBuffer(file);
+        });
+    </script>
+  </body>
+</html>
