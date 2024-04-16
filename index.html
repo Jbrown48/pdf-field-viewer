@@ -31,6 +31,7 @@
           <th>Manifest No.</th>
           <th>#</th>
           <th>Drum Weight</th>
+          <th>Bill CD</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -47,6 +48,7 @@
         "Manifest No.": [],
         "Plant Received Date": [],
         "Drum Weight": [],
+        "Bill CD": [],
       };
 
       document
@@ -70,6 +72,7 @@
                   "Plant Received Date":
                     /Plant Received Date\s+(\d{1,2}\/\d{1,2}\/\d{4})/gi,
                   "Drum Weight": /Drum\s*Wgt\s*(?:\S+\s+){6,8}(\d+)/gi,
+                  "Bill CD": /Bill\s*CD\s*(?:\S+\s+){9}(?!\d)(\w+)/gi,
                 };
 
                 // Loop through each page
@@ -91,7 +94,7 @@
                           var regex = fieldMap[field];
                           var match;
                           while ((match = regex.exec(text)) !== null) {
-                            var value = match[1].trim() || "Not found";
+                            var value = match[1] || "Not found";
                             valuesByField[field].push(value);
                           }
                         });
@@ -123,6 +126,8 @@
                     newRow.insertCell(3).textContent = 1;
                     newRow.insertCell(4).textContent =
                       valuesByField["Drum Weight"][i] || "";
+                    newRow.insertCell(5).textContent =
+                      valuesByField["Bill CD"][i] || "";
                   }
 
                   // Sort the table by Plant Received Date in descending order
