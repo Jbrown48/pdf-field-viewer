@@ -72,7 +72,8 @@
                   "Plant Received Date":
                     /Plant Received Date\s+(\d{1,2}\/\d{1,2}\/\d{4})/gi,
                   "Drum Weight": /Drum\s*Wgt\s*(?:\S+\s+){6,8}(\d+)/gi,
-                  "Bill CD": /Bill\s*CD\s*(?:\S+\s+){9}(?!\d)(\w+)/gi,
+                  // "Bill CD": /Bill\s*CD\s*(?:\S+\s+){9}(?!\d)(\w+)/gi,
+                  "Bill CD": /Bill\s*CD(?:\s+\S+){9}(?:\s+(\w+))/gi,
                 };
 
                 // Loop through each page
@@ -95,6 +96,9 @@
                           var match;
                           while ((match = regex.exec(text)) !== null) {
                             var value = match[1] || "Not found";
+                            if (field === "Bill CD" && /^\d+$/.test(value)) {
+                              value = " "; // Set the value to blank
+                            }
                             valuesByField[field].push(value);
                           }
                         });
